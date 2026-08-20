@@ -5,6 +5,9 @@ import {
   TouchableOpacity,
   FlatList,
   SafeAreaView,
+  Image,
+  StatusBar,
+  ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -15,36 +18,59 @@ const bookings = [
     id: '1',
     toolName: 'Concrete Mixer 500L',
     ownerName: 'John Doe',
-    startDate: '2026-08-25',
-    endDate: '2026-08-27',
+    startDate: 'Aug 25, 2026',
+    endDate: 'Aug 27, 2026',
     price: 50000,
     status: 'upcoming' as BookingStatus,
+    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=500&h=300&fit=crop',
   },
   {
     id: '2',
     toolName: 'Professional Camera Kit',
     ownerName: 'Jane Smith',
-    startDate: '2026-08-20',
-    endDate: '2026-08-21',
+    startDate: 'Aug 20, 2026',
+    endDate: 'Aug 21, 2026',
     price: 35000,
     status: 'active' as BookingStatus,
+    image: 'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=500&h=300&fit=crop',
   },
   {
     id: '3',
     toolName: 'Sound System Pro',
     ownerName: 'Mike Johnson',
-    startDate: '2026-08-15',
-    endDate: '2026-08-16',
+    startDate: 'Aug 15, 2026',
+    endDate: 'Aug 16, 2026',
     price: 45000,
     status: 'completed' as BookingStatus,
+    image: 'https://images.unsplash.com/photo-1545127398-14699f92334b?w=500&h=300&fit=crop',
   },
 ];
 
-const statusColors = {
-  upcoming: 'text-blue-600 bg-blue-50',
-  active: 'text-green-600 bg-green-50',
-  completed: 'text-gray-600 bg-gray-100',
-  cancelled: 'text-red-600 bg-red-50',
+const statusConfig = {
+  upcoming: {
+    label: 'Upcoming',
+    color: '#1a73e8',
+    bgColor: '#e8f0fe',
+    icon: 'calendar-outline' as const,
+  },
+  active: {
+    label: 'Active',
+    color: '#34a853',
+    bgColor: '#e6f4ea',
+    icon: 'checkmark-circle-outline' as const,
+  },
+  completed: {
+    label: 'Completed',
+    color: '#666',
+    bgColor: '#f0f2f5',
+    icon: 'checkmark-done-outline' as const,
+  },
+  cancelled: {
+    label: 'Cancelled',
+    color: '#ea4335',
+    bgColor: '#fce8e6',
+    icon: 'close-circle-outline' as const,
+  },
 };
 
 export default function BookingsScreen() {
@@ -60,83 +86,149 @@ export default function BookingsScreen() {
     { key: 'upcoming', label: 'Upcoming' },
     { key: 'active', label: 'Active' },
     { key: 'completed', label: 'Completed' },
-    { key: 'cancelled', label: 'Cancelled' },
   ];
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="bg-white px-4 pt-4 pb-2">
-        <Text className="text-2xl font-bold text-gray-900">My Bookings</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f2f4f8' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f2f4f8" />
+
+      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
+        <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1a1a2e' }}>My Bookings</Text>
+        <Text style={{ color: '#999', fontSize: 14, marginTop: 2 }}>Track your rentals</Text>
       </View>
 
       {/* Tabs */}
-      <View className="flex-row bg-white px-2 pb-2 border-b border-gray-200">
-        {tabs.map((tab) => (
-          <TouchableOpacity
-            key={tab.key}
-            className={`px-4 py-2 mx-1 rounded-full ${
-              activeTab === tab.key ? 'bg-blue-600' : 'bg-transparent'
-            }`}
-            onPress={() => setActiveTab(tab.key as BookingStatus | 'all')}
-          >
-            <Text
-              className={`text-sm font-medium ${
-                activeTab === tab.key ? 'text-white' : 'text-gray-600'
-              }`}
+      <View style={{ paddingHorizontal: 16, paddingVertical: 8 }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {tabs.map((tab) => (
+            <TouchableOpacity
+              key={tab.key}
+              style={{
+                paddingHorizontal: 20,
+                paddingVertical: 10,
+                marginHorizontal: 4,
+                borderRadius: 20,
+                backgroundColor: activeTab === tab.key ? '#1a73e8' : '#fff',
+                shadowColor: activeTab === tab.key ? '#1a73e8' : '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: activeTab === tab.key ? 0.2 : 0.05,
+                shadowRadius: 4,
+                elevation: activeTab === tab.key ? 4 : 1,
+                borderWidth: 1,
+                borderColor: activeTab === tab.key ? '#1a73e8' : '#f0f2f5',
+              }}
+              activeOpacity={0.7}
+              onPress={() => setActiveTab(tab.key as BookingStatus | 'all')}
             >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: '600',
+                  color: activeTab === tab.key ? '#fff' : '#666',
+                }}
+              >
+                {tab.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       {/* Bookings List */}
       <FlatList
         data={filteredBookings}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100">
-            <View className="flex-row justify-between items-start">
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-gray-900">
-                  {item.toolName}
-                </Text>
-                <Text className="text-gray-500 text-sm">
-                  Owner: {item.ownerName}
-                </Text>
-                <Text className="text-gray-500 text-sm mt-1">
-                  {item.startDate} → {item.endDate}
-                </Text>
-              </View>
-              <View>
-                <Text className="text-base font-bold text-blue-600">
-                  {item.price.toLocaleString()} RWF
-                </Text>
-                <View
-                  className={`mt-1 px-3 py-1 rounded-full ${
-                    statusColors[item.status].split(' ')[1]
-                  }`}
-                >
-                  <Text
-                    className={`text-xs font-medium ${
-                      statusColors[item.status].split(' ')[0]
-                    }`}
-                  >
-                    {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+        renderItem={({ item }) => {
+          const config = statusConfig[item.status];
+          return (
+            <TouchableOpacity
+              style={{
+                backgroundColor: '#fff',
+                borderRadius: 20,
+                marginBottom: 16,
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.08,
+                shadowRadius: 12,
+                elevation: 3,
+                overflow: 'hidden',
+              }}
+              activeOpacity={0.9}
+            >
+              <Image source={{ uri: item.image }} style={{ width: '100%', height: 140 }} resizeMode="cover" />
+              <View style={{ padding: 16 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <View style={{ flex: 1, marginRight: 10 }}>
+                    <Text style={{ fontSize: 17, fontWeight: 'bold', color: '#1a1a2e' }} numberOfLines={1}>
+                      {item.toolName}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#666', marginTop: 2 }}>
+                      {item.ownerName}
+                    </Text>
+                  </View>
+                  <View style={{ 
+                    backgroundColor: config.bgColor, 
+                    paddingHorizontal: 12, 
+                    paddingVertical: 5, 
+                    borderRadius: 12,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                    <Ionicons name={config.icon} size={14} color={config.color} />
+                    <Text style={{ fontSize: 12, fontWeight: '600', color: config.color, marginLeft: 4 }}>
+                      {config.label}
+                    </Text>
+                  </View>
+                </View>
+                
+                <View style={{ 
+                  flexDirection: 'row', 
+                  alignItems: 'center', 
+                  marginTop: 12, 
+                  paddingTop: 12, 
+                  borderTopWidth: 1, 
+                  borderTopColor: '#f0f2f5' 
+                }}>
+                  <Ionicons name="calendar-outline" size={16} color="#666" />
+                  <Text style={{ fontSize: 14, color: '#666', marginLeft: 8 }}>
+                    {item.startDate} → {item.endDate}
+                  </Text>
+                </View>
+
+                <View style={{ 
+                  flexDirection: 'row', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  marginTop: 10 
+                }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Ionicons name="cash-outline" size={16} color="#666" />
+                    <Text style={{ fontSize: 14, color: '#666', marginLeft: 6 }}>Total:</Text>
+                  </View>
+                  <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#1a73e8' }}>
+                    {item.price.toLocaleString()} RWF
                   </Text>
                 </View>
               </View>
-            </View>
-          </TouchableOpacity>
-        )}
+            </TouchableOpacity>
+          );
+        }}
         ListEmptyComponent={
-          <View className="flex-1 justify-center items-center py-16">
-            <Ionicons name="calendar-outline" size={48} color="#ccc" />
-            <Text className="text-lg text-gray-400 mt-3">No bookings found</Text>
-            <Text className="text-sm text-gray-300 mt-1">
-              Start renting tools today!
-            </Text>
+          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 80 }}>
+            <View style={{ 
+              width: 80, 
+              height: 80, 
+              borderRadius: 40, 
+              backgroundColor: '#f0f2f5', 
+              alignItems: 'center', 
+              justifyContent: 'center' 
+            }}>
+              <Ionicons name="calendar-outline" size={40} color="#ccc" />
+            </View>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: '#999', marginTop: 16 }}>No bookings</Text>
+            <Text style={{ fontSize: 14, color: '#bbb', marginTop: 4 }}>Start renting tools today</Text>
           </View>
         }
       />

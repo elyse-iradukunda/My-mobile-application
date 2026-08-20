@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   SafeAreaView,
   Image,
+  StatusBar,
 } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,14 +19,16 @@ const chatList = [
     time: '2 min ago',
     unread: 2,
     online: true,
+    avatar: 'https://i.pravatar.cc/150?img=1',
   },
   {
     id: '2',
     name: 'Jane Smith',
-    lastMessage: 'Perfect! I\'ll pick it up at 9am',
+    lastMessage: "Perfect! I'll pick it up at 9am",
     time: '1 hour ago',
     unread: 0,
     online: false,
+    avatar: 'https://i.pravatar.cc/150?img=2',
   },
   {
     id: '3',
@@ -34,59 +37,109 @@ const chatList = [
     time: '2 hours ago',
     unread: 0,
     online: true,
+    avatar: 'https://i.pravatar.cc/150?img=3',
+  },
+  {
+    id: '4',
+    name: 'Sarah Williams',
+    lastMessage: 'When can I return the equipment?',
+    time: '3 hours ago',
+    unread: 1,
+    online: false,
+    avatar: 'https://i.pravatar.cc/150?img=4',
   },
 ];
 
 export default function ChatScreen() {
+  const formatTime = (time: string) => {
+    return time;
+  };
+
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      <View className="bg-white px-4 pt-4 pb-2">
-        <Text className="text-2xl font-bold text-gray-900">Messages</Text>
-        <Text className="text-gray-500 text-sm">
-          Chat with tool owners and workers
-        </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f2f4f8' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#f2f4f8" />
+
+      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 8 }}>
+        <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#1a1a2e' }}>Messages</Text>
+        <Text style={{ color: '#999', fontSize: 14, marginTop: 2 }}>Chat with tool owners and workers</Text>
       </View>
 
       <FlatList
         data={chatList}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16 }}
+        contentContainerStyle={{ paddingHorizontal: 20, paddingTop: 8, paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
         renderItem={({ item }) => (
           <TouchableOpacity
-            className="bg-white rounded-xl p-4 mb-3 shadow-sm border border-gray-100"
+            style={{
+              backgroundColor: '#fff',
+              borderRadius: 16,
+              padding: 16,
+              marginBottom: 12,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.05,
+              shadowRadius: 8,
+              elevation: 2,
+              borderWidth: 1,
+              borderColor: '#f0f2f5',
+            }}
+            activeOpacity={0.7}
             onPress={() => router.push('/chat/conversation')}
           >
-            <View className="flex-row items-center">
-              <View className="relative">
-                <View className="w-14 h-14 rounded-full bg-blue-600 justify-center items-center">
-                  <Text className="text-white text-xl font-bold">
-                    {item.name.charAt(0)}
-                  </Text>
-                </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ position: 'relative' }}>
+                <Image
+                  source={{ uri: item.avatar }}
+                  style={{ width: 56, height: 56, borderRadius: 28 }}
+                />
                 {item.online && (
-                  <View className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white" />
+                  <View style={{
+                    position: 'absolute',
+                    bottom: 2,
+                    right: 2,
+                    width: 14,
+                    height: 14,
+                    backgroundColor: '#34a853',
+                    borderRadius: 7,
+                    borderWidth: 2,
+                    borderColor: '#fff',
+                  }} />
                 )}
               </View>
 
-              <View className="flex-1 ml-3">
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-base font-semibold text-gray-900">
+              <View style={{ flex: 1, marginLeft: 14 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={{ fontSize: 16, fontWeight: '600', color: '#1a1a2e' }}>
                     {item.name}
                   </Text>
-                  <Text className="text-xs text-gray-400">{item.time}</Text>
+                  <Text style={{ fontSize: 12, color: '#999' }}>
+                    {item.time}
+                  </Text>
                 </View>
-                <View className="flex-row justify-between items-center mt-1">
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 4 }}>
                   <Text
-                    className={`text-sm flex-1 mr-2 ${
-                      item.unread > 0 ? 'text-gray-900 font-medium' : 'text-gray-500'
-                    }`}
+                    style={{
+                      fontSize: 14,
+                      flex: 1,
+                      marginRight: 8,
+                      color: item.unread > 0 ? '#1a1a2e' : '#999',
+                      fontWeight: item.unread > 0 ? '500' : '400',
+                    }}
                     numberOfLines={1}
                   >
                     {item.lastMessage}
                   </Text>
                   {item.unread > 0 && (
-                    <View className="bg-blue-600 rounded-full px-2 py-0.5">
-                      <Text className="text-white text-xs font-bold">
+                    <View style={{
+                      backgroundColor: '#1a73e8',
+                      borderRadius: 12,
+                      paddingHorizontal: 8,
+                      paddingVertical: 3,
+                      minWidth: 24,
+                      alignItems: 'center',
+                    }}>
+                      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
                         {item.unread}
                       </Text>
                     </View>
@@ -97,12 +150,19 @@ export default function ChatScreen() {
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          <View className="flex-1 justify-center items-center py-16">
-            <Ionicons name="chatbubbles-outline" size={48} color="#ccc" />
-            <Text className="text-lg text-gray-400 mt-3">No messages</Text>
-            <Text className="text-sm text-gray-300 mt-1">
-              Start a conversation with tool owners
-            </Text>
+          <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 80 }}>
+            <View style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: '#f0f2f5',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}>
+              <Ionicons name="chatbubbles-outline" size={40} color="#ccc" />
+            </View>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: '#999', marginTop: 16 }}>No messages</Text>
+            <Text style={{ fontSize: 14, color: '#bbb', marginTop: 4 }}>Start a conversation</Text>
           </View>
         }
       />
