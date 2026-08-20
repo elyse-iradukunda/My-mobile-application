@@ -1,22 +1,22 @@
 import { Redirect } from 'expo-router';
+import { useEffect } from 'react';
+import { ActivityIndicator, View } from 'react-native';
 import { useAuthStore } from '@/stores/auth.store';
-import { useEffect, useState } from 'react';
 
 export default function Index() {
   const { user, isLoading, loadUser } = useAuthStore();
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    loadUser().finally(() => setIsReady(true));
-  }, []);
+    loadUser();
+  }, [loadUser]);
 
-  if (!isReady || isLoading) {
-    return null; // Or a loading screen
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
-  if (user) {
-    return <Redirect href="/(main)/home" />;
-  } else {
-    return <Redirect href="/(auth)/login" />;
-  }
+  return <Redirect href={user ? '/(main)/home' : '/(auth)/login'} />;
 }
