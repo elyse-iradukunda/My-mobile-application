@@ -1,66 +1,72 @@
-import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
 import { create } from 'zustand';
-
-const USER_KEY = 'auth.user';
-
-export interface AuthUser {
-  id: string;
-  phone: string;
-  name?: string;
-}
+import { authService } from '@/services/auth.service';
+import { LoginData, RegisterData, User } from '@/types/user.types';
+import { ACCESS_TOKEN_KEY, USER_KEY, getItem, removeItem, setItem } from '@/utils/storage';
 
 interface AuthState {
-  user: AuthUser | null;
+  user: User | null;
   isLoading: boolean;
-  loadUser: () => Promise<void>;
-  setUser: (user: AuthUser | null) => Promise<void>;
+  isAuthenticated: boolean;
+  login: (data: LoginData) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
+  verifyPhone: (code: string) => Promise<void>;
   logout: () => Promise<void>;
+  loadUser: () => Promise<void>;
+  setUser: (user: User) => Promise<void>;
 }
 
-async function readUser(): Promise<string | null> {
-  if (Platform.OS === 'web') {
-    return globalThis.localStorage?.getItem(USER_KEY) ?? null;
-  }
-  return SecureStore.getItemAsync(USER_KEY);
-}
-
-async function writeUser(value: string | null): Promise<void> {
-  if (Platform.OS === 'web') {
-    if (value === null) {
-      globalThis.localStorage?.removeItem(USER_KEY);
-    } else {
-      globalThis.localStorage?.setItem(USER_KEY, value);
-    }
-    return;
-  }
-  if (value === null) {
-    await SecureStore.deleteItemAsync(USER_KEY);
-  } else {
-    await SecureStore.setItemAsync(USER_KEY, value);
-  }
+async function persistSession(user: User, token: string): Promise<void> {
+  await setItem(ACCESS_TOKEN_KEY, token);
+  await setItem(USER_KEY, JSON.stringify(user));
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoading: true,
+  isAuthenticated: false,
+
+  login: async (data) => {
+    const { user, token } = await authService.login(data);
+    await persistSession(user, token);
+    set({ user, isAuthenticated: true });
+  },
+
+  register: async (data) => {
+    const { user, token } = await authService.register(data);
+    await persistSession(user, token);
+    set({ user, isAuthenticated: true });
+  },
+
+  verifyPhone: async (code) => {
+    const user = await authService.verifyPhone(code);
+    await setItem(USER_KEY, JSON.stringify(user));
+    set({ user });
+  },
+
+  logout: async () => {
+    await removeItem(ACCESS_TOKEN_KEY);
+    await removeItem(USER_KEY);
+    set({ user: null, isAuthenticated: false });
+  },
+
   loadUser: async () => {
     set({ isLoading: true });
     try {
-      const stored = await readUser();
-      set({ user: stored ? (JSON.parse(stored) as AuthUser) : null });
+      const [token, userJson] = await Promise.all([getItem(ACCESS_TOKEN_KEY), getItem(USER_KEY)]);
+      if (token && userJson) {
+        set({ user: JSON.parse(userJson) as User, isAuthenticated: true });
+      } else {
+        set({ user: null, isAuthenticated: false });
+      }
     } catch {
-      set({ user: null });
+      set({ user: null, isAuthenticated: false });
     } finally {
       set({ isLoading: false });
     }
   },
+
   setUser: async (user) => {
-    await writeUser(user ? JSON.stringify(user) : null);
+    await setItem(USER_KEY, JSON.stringify(user));
     set({ user });
-  },
-  logout: async () => {
-    await writeUser(null);
-    set({ user: null });
   },
 }));
