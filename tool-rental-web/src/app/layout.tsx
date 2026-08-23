@@ -1,9 +1,13 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
+import { QueryProvider } from '@/providers/QueryProvider';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Tool Rental Rwanda - Rent Tools & Hire Workers',
-  description: 'Connect with tool owners and skilled workers across Rwanda. Rent equipment, find jobs, and grow your business.',
+  title: 'Tool Rental Rwanda',
+  description: 'Rent tools and equipment in Rwanda',
 };
 
 export default function RootLayout({
@@ -13,8 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 text-gray-900 antialiased">
-        {children}
+      <body className={inter.className}>
+        <QueryProvider>
+          {children}
+        </QueryProvider>
       </body>
     </html>
   );

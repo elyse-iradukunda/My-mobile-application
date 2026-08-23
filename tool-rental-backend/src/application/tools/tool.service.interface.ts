@@ -44,9 +44,13 @@ export interface ToolServiceInterface {
   create(data: CreateToolData): Promise<Tool>;
   findById(id: string): Promise<Tool | null>;
   findAll(params?: SearchToolsParams): Promise<Tool[]>;
+  findToolsWithOwner(params?: SearchToolsParams): Promise<Tool[]>;
   findByOwner(ownerId: string): Promise<Tool[]>;
   update(id: string, data: UpdateToolData): Promise<Tool>;
   delete(id: string): Promise<void>;
   updateStatus(id: string, status: ToolStatus): Promise<Tool>;
   isAvailable(toolId: string): Promise<boolean>;
+  getCategoryStats(): Promise<{ category: string; count: number }[]>;
+  bulkUpdateStatus(toolIds: string[], status: ToolStatus): Promise<Tool[]>;
+  bulkDelete(toolIds: string[]): Promise<void>;
 }

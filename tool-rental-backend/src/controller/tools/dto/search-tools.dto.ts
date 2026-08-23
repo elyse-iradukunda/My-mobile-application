@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, Min, IsEnum } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, IsEnum, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ToolStatus } from '@persistence/tools/tool.entity';
 
@@ -46,4 +46,25 @@ export class SearchToolsDto {
   @IsString()
   @IsOptional()
   search?: string;
+
+  @IsString()
+  @IsOptional()
+  ownerId?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  @Type(() => Boolean)
+  featured?: boolean;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  @Min(1)
+  limit?: number;
+
+  @IsNumber()
+  @IsOptional()
+  @Type(() => Number)
+  @Min(0)
+  offset?: number;
 }

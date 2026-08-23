@@ -11,10 +11,18 @@ export const toolService = {
   getByOwner: (ownerId: string) =>
     apiClient.get<{ data: Tool[] }>(`/tools/owner/${ownerId}`),
 
-  create: (data: FormData) =>
-    apiClient.post<{ data: Tool }>('/tools', data, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    }),
+  create: (data: {
+    title: string;
+    description?: string;
+    category: string;
+    pricePerDay: number;
+    deposit?: number;
+    location: string;
+    lat?: number;
+    lng?: number;
+    images?: string[];
+  }) =>
+    apiClient.post<{ success: boolean; data: Tool }>('/tools', data),
 
   update: (id: string, data: Partial<Tool>) =>
     apiClient.patch<{ data: Tool }>(`/tools/${id}`, data),

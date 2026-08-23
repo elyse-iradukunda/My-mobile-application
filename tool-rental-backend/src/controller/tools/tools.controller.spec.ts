@@ -44,12 +44,16 @@ class MockAuthenticationGuard {
 const mockToolService = {
   create: jest.fn().mockResolvedValue(mockTool),
   findAll: jest.fn().mockResolvedValue(mockTools),
+  findToolsWithOwner: jest.fn().mockResolvedValue(mockTools),
   findByOwner: jest.fn().mockResolvedValue(mockTools),
   findById: jest.fn().mockResolvedValue(mockTool),
   update: jest.fn().mockResolvedValue({ ...mockTool, title: 'Updated Tool' }),
   delete: jest.fn().mockResolvedValue(undefined),
   updateStatus: jest.fn().mockResolvedValue({ ...mockTool, status: ToolStatus.RENTED }),
+  bulkUpdateStatus: jest.fn().mockResolvedValue([{ ...mockTool, status: ToolStatus.RENTED }]),
+  bulkDelete: jest.fn().mockResolvedValue(undefined),
   isAvailable: jest.fn().mockResolvedValue(true),
+  getCategoryStats: jest.fn().mockResolvedValue([{ category: 'Construction', count: 1 }]),
 };
 
 describe('ToolsController', () => {
@@ -205,6 +209,29 @@ describe('ToolsController', () => {
 
       expect(result).toEqual({ success: true, data: updatedTool });
       expect(service.updateStatus).toHaveBeenCalledWith(mockTool.id, 'rented');
+    });
+  });
+
+  describe('bulkUpdateStatus', () => {
+    it('should update multiple tool statuses', async () => {
+      const updatedTools = [{ ...mockTool, status: ToolStatus.RENTED }];
+      service.bulkUpdateStatus = jest.fn().mockResolvedValueOnce(updatedTools);
+
+      const result = await controller.bulkUpdateStatus([mockTool.id], 'rented');
+
+      expect(result).toEqual({ success: true, data: updatedTools });
+      expect(service.bulkUpdateStatus).toHaveBeenCalledWith([mockTool.id], 'rented');
+    });
+  });
+
+  describe('bulkDelete', () => {
+    it('should delete multiple tools', async () => {
+      service.bulkDelete = jest.fn().mockResolvedValueOnce(undefined);
+
+      const result = await controller.bulkDelete([mockTool.id]);
+
+      expect(result).toEqual({ success: true, data: { deletedCount: 1 } });
+      expect(service.bulkDelete).toHaveBeenCalledWith([mockTool.id]);
     });
   });
 

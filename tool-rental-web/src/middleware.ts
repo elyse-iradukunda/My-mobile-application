@@ -1,26 +1,21 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const publicRoutes = ['/login', '/register', '/'];
-const authRoutes = ['/login', '/register'];
+const publicRoutes = new Set(['/login', '/register', '/']);
+const authRoutes = new Set(['/login', '/register']);
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('access_token')?.value;
   const { pathname } = request.nextUrl;
 
-  // Check if the route is public
-  const isPublicRoute = publicRoutes.some((route) =>
-    route === '/' ? pathname === '/' : pathname.startsWith(route)
-  );
-  const isAuthRoute = authRoutes.some((route) => pathname.startsWith(route));
+  const isPublicRoute = publicRoutes.has(pathname);
+  const isAuthRoute = authRoutes.has(pathname);
 
-  // If user has token and is on auth page, redirect to dashboard
   if (token && isAuthRoute) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // If user doesn't have token and tries to access protected route
-  if (!token && !isPublicRoute) {
+  if (!token && !isPublicRoute && !pathname.startsWith('/_next')) {
     return NextResponse.redirect(new URL('/login', request.url));
   }
 

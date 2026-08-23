@@ -47,6 +47,9 @@ describe('ToolService', () => {
   let repository: jest.Mocked<ToolRepositoryInterface>;
 
   beforeEach(async () => {
+    mockTool.status = ToolStatus.AVAILABLE;
+    mockTool.updatedAt = new Date();
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ToolService,
@@ -290,6 +293,31 @@ describe('ToolService', () => {
       await expect(service.updateStatus('non-existent-id', ToolStatus.RENTED)).rejects.toThrow(
         ToolNotFoundError
       );
+    });
+  });
+
+  describe('bulkUpdateStatus', () => {
+    it('should update multiple tool statuses', async () => {
+      const rentedTool = { ...mockTool, status: ToolStatus.RENTED };
+      repository.findById.mockResolvedValue(mockTool);
+      repository.update.mockResolvedValue(rentedTool);
+
+      const result = await service.bulkUpdateStatus([mockTool.id], ToolStatus.RENTED);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].status).toBe(ToolStatus.RENTED);
+      expect(repository.update).toHaveBeenCalled();
+    });
+  });
+
+  describe('bulkDelete', () => {
+    it('should delete multiple tools', async () => {
+      repository.findById.mockResolvedValue(mockTool);
+      repository.delete.mockResolvedValue(undefined);
+
+      await service.bulkDelete([mockTool.id]);
+
+      expect(repository.delete).toHaveBeenCalledWith(mockTool.id);
     });
   });
 
